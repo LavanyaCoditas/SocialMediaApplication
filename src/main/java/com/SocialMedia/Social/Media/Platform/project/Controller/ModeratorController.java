@@ -28,7 +28,7 @@ public class ModeratorController {
     @PostMapping("/posts/{id}/disapprove")
     public ResponseEntity<?> disapprovePost(@PathVariable Long id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Posts post = postService.disapprovePost(id, username);
+        Posts post = postService.disapprovePost(id, username);//disapproving post
         return ResponseEntity.ok(new PostResponse(post.getId(), post.getStatus()));
     }
 
