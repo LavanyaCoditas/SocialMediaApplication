@@ -68,26 +68,26 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getAllComments());
     }
 
-    @PostMapping("/comments/{id}/approve")
+    @PostMapping("/{id}/approve")
     public ResponseEntity<?> approveComment(@PathVariable Long id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Comments comment = commentService.approveComment(id, username);
         return ResponseEntity.ok(Map.of("commentId", comment.getId(), "status", comment.getStatus()));
     }
 
-    @PostMapping("/comments/{id}/disapprove")
+    @PostMapping("/{id}/disapprove")
     public ResponseEntity<?> disapproveComment(@PathVariable Long id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Comments comment = commentService.disapproveComment(id, username);
         return ResponseEntity.ok(Map.of("commentId", comment.getId(), "status", comment.getStatus()));
     }
 
-    @GetMapping("/comments/pending")
+    @GetMapping("/pending")
     public ResponseEntity<List<Comments>> getPendingComments() {
         return ResponseEntity.ok(commentService.getPendingComments());
     }
 
-    @GetMapping("/comments/blocked")
+    @GetMapping("/blocked")
     public ResponseEntity<List<Comments>> getBlockedComments() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(commentService.getBlockedComments(username));

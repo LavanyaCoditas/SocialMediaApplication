@@ -66,7 +66,7 @@ public class CommentService {
         Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
         User moderator = userRepo.findByUsername(moderatorUsername);
         if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
-            throw new RuntimeException("Unauthorized: Only moderators or super admins can approve");
+            throw new RuntimeException("Unauthorized acces : Only moderators or super admins can approve");
         }
         String moderatorId = moderator.getId().toString();
         if (!comment.getApprovedBy().contains(moderatorId)) {
@@ -110,15 +110,17 @@ public class CommentService {
     }
 
 
-    public List<Comments> getBlockedComments(String moderatorUsername) {
+    public List<Comments> getBlockedComments(String moderatorUsername)
+    {
         User moderator = userRepo.findByUsername(moderatorUsername);
         if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
             throw new RuntimeException("Unauthorized: Only moderators or super admins can view blocked comments");
         }
         return commentRepo.findByDisapprovedByContaining(moderator.getId().toString());
     }
-    // Additional: Get all comments (admin/moderator only, all statuses)
-    public List<Comments> getAllComments() {
+
+    public List<Comments> getAllComments()
+    {
         return commentRepo.findAll();
     }
 }

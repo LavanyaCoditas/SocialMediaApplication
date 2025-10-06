@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll() // Public endpoints
-                        .requestMatchers("https://nonsudsing-worked-simona.ngrok-free.dev/**").permitAll()
+
                         .requestMatchers("/api/admin/**").hasRole("SUPER_ADMIN") // Super admin only
                         .requestMatchers("/api/moderator/**","/api/users/**").hasAnyRole("MODERATOR", "SUPER_ADMIN") // Moderator and super admin
                         .requestMatchers("/api/posts/**","/api/comments/**","/api/users/**").hasAnyRole("USER", "MODERATOR", "SUPER_ADMIN") // User actions

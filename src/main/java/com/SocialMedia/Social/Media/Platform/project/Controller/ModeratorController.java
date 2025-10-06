@@ -33,16 +33,13 @@ public class ModeratorController {
     }
 
     @GetMapping("/posts/pending")
-    public ResponseEntity<List<Posts>> getPendingPosts() {
-        return ResponseEntity.ok(postService.getPendingPosts());
+    public ResponseEntity<List<Posts>> getPendingPosts() { return ResponseEntity.ok(postService.getPendingPosts());
     }
 
     @GetMapping("/posts/blocked")
     public ResponseEntity<List<Posts>> getBlockedPosts() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(postService.getBlockedPosts(username));
+        return ResponseEntity.ok(postService .getBlockedPosts(username));
     }
-
-
 
 }

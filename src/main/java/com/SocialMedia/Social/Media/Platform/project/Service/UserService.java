@@ -87,6 +87,7 @@ public class UserService {
         return user;
     }
 
+    //user can delete his own profile  and super admin can also delete any user , but not th moderator
     public void deleteUser(Long id, String currentUsername) {
         User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         User currentUser = userRepo.findByUsername(currentUsername);
