@@ -42,4 +42,7 @@ public class ModeratorController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(postService.getBlockedPosts(username));
     }
+
+
+
 }

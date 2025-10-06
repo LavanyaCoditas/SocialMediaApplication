@@ -35,11 +35,11 @@ public class Comments { // Renamed to singular "Comment"
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private CommentStatus status = CommentStatus.PENDING; // Default to PENDING
+    private CommentStatus status = CommentStatus.PENDING; // Default  status whena  new comment is created is set to PENDING
 
     @ElementCollection
-    private List<String> approvedBy = new ArrayList<>(); // Moderator user IDs who approved
+    private List<String> approvedBy = new ArrayList<>(); // Moderator's ID who approved- to get the list for the moderator about what comment he has approved
 
     @ElementCollection
-    private List<String> disapprovedBy = new ArrayList<>(); // Moderator user IDs who disapproved
+    private List<String> disapprovedBy = new ArrayList<>(); // Moderator ID who disapproved- used in moderator controller
 }

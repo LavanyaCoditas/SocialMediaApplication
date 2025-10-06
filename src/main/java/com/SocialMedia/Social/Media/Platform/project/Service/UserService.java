@@ -48,9 +48,11 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public String login(LoginDTO loginDTO) {
+    public String login(LoginDTO loginDTO)
+    {
         User user = userRepo.findByEmail(loginDTO.getEmail());
-        if (user == null || !passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+        if(user == null || !passwordEncoder.matches(loginDTO.getPassword(), user.getPassword()))
+        {
             throw new RuntimeException("Wrong credentials");
         }
         return authUtil.generateAccessToken(user);
@@ -69,5 +71,32 @@ public class UserService {
         }
         user.setUpdatedAt(LocalDateTime.now());
         return userRepo.save(user);
+    }
+
+    public User getUserById(Long id, String currentUsername) {
+        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = userRepo.findByUsername(currentUsername);
+        if (currentUser == null) {
+            throw new RuntimeException("Unauthorized access");
+        }
+        // Allow access if user is viewing their own profile, or is a moderator/admin
+        if (!user.getUsername().equals(currentUsername) &&
+                !(currentUser.getRole() == Role.ROLE_MODERATOR || currentUser.getRole() == Role.ROLE_SUPER_ADMIN || currentUser.getRole()==Role.ROLE_USER)) {
+            throw new RuntimeException("Unauthorized access");
+        }
+        return user;
+    }
+
+    public void deleteUser(Long id, String currentUsername) {
+        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = userRepo.findByUsername(currentUsername);
+        if (currentUser == null) {
+            throw new RuntimeException("Unauthorized access");
+        }
+        // Allow deletion if user is deleting their own account or is a super admin
+        if (!user.getUsername().equals(currentUsername) && currentUser.getRole() != Role.ROLE_SUPER_ADMIN) {
+            throw new RuntimeException("Unauthorized access");
+        }
+        userRepo.delete(user);
     }
 }
