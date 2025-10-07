@@ -27,11 +27,11 @@ public class Comments { // Renamed to singular "Comment"
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "post_id") // Renamed for clarity
+    @JoinColumn(name = "post_id")
     private Posts post;
 
     @ManyToOne
-    @JoinColumn(name = "user_id") // Renamed for clarity
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Enumerated(EnumType.STRING)

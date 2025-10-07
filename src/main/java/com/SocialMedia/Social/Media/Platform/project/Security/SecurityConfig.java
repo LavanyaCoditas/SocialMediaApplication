@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll() // Public endpoints
 
                         .requestMatchers("/api/admin/**").hasRole("SUPER_ADMIN") // Super admin only
-                        .requestMatchers("/api/moderator/**","/api/users/**").hasAnyRole("MODERATOR", "SUPER_ADMIN") // Moderator and super admin
+                        .requestMatchers("/api/moderator/**").hasAnyRole("MODERATOR", "SUPER_ADMIN") // Moderator and super admin
                         .requestMatchers("/api/posts/**","/api/comments/**","/api/users/**").hasAnyRole("USER", "MODERATOR", "SUPER_ADMIN") // User actions
                         .anyRequest().authenticated()
                 )
