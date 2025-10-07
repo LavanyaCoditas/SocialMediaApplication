@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -100,4 +101,14 @@ public class UserService {
         }
         userRepo.delete(user);
     }
+
+    public List<User> getAllUsers(String currentUsername) {
+      return   userRepo.findAll();
+    }
+
+    public List<User> getAllModerators() {
+        return userRepo.findByRole(Role.ROLE_MODERATOR);
+    }
 }
+
+

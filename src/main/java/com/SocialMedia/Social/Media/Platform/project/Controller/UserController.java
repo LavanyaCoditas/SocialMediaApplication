@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -44,6 +45,18 @@ public class UserController {
             if (e.getMessage().equals("User not found")) {
                 return ResponseEntity.status(404).body(Map.of("message", "User not found"));
             }
+            return ResponseEntity.status(403).body(Map.of("message", "Unauthorized access"));
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<?> getAllUsers() {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            List<User> users = userService.getAllUsers(currentUsername);
+            return ResponseEntity.ok(users);
+        } catch (RuntimeException e) {
             return ResponseEntity.status(403).body(Map.of("message", "Unauthorized access"));
         }
     }

@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')") // Changed to hasAuthority
@@ -22,5 +24,11 @@ public class AdminController {
     {
         User user = userService.makeModerator(userId, actionDTO.getAction());
         return ResponseEntity.ok("User updated successfully");
+    }
+
+    @GetMapping("/moderators")
+    public ResponseEntity<List<User>> getAllModerators() {
+        List<User> moderators = userService.getAllModerators();
+        return ResponseEntity.ok(moderators);
     }
 }

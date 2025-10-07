@@ -40,6 +40,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<Posts>> getApprovedPosts() {
+
+
         return ResponseEntity.ok(postService.getApprovedPosts());
     }
 
@@ -48,4 +50,6 @@ public class PostController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(postService.getUserPosts(username));
     }
+
+
 }
