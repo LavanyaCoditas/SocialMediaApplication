@@ -1,6 +1,6 @@
 package com.SocialMedia.Social.Media.Platform.project.Repository;
 
-import com.SocialMedia.Social.Media.Platform.project.Entity.Role;
+import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

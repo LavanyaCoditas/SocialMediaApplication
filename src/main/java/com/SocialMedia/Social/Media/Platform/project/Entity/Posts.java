@@ -1,11 +1,9 @@
 package com.SocialMedia.Social.Media.Platform.project.Entity;
 
+import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +14,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+
 public class Posts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

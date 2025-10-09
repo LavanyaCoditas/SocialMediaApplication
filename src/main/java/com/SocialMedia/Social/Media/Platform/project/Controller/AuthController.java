@@ -1,9 +1,6 @@
 package com.SocialMedia.Social.Media.Platform.project.Controller;
 
-import com.SocialMedia.Social.Media.Platform.project.DTO.LoginDTO;
-import com.SocialMedia.Social.Media.Platform.project.DTO.LoginResponse;
-import com.SocialMedia.Social.Media.Platform.project.DTO.SignupResponse;
-import com.SocialMedia.Social.Media.Platform.project.DTO.UserSignupDTO;
+import com.SocialMedia.Social.Media.Platform.project.DTO.*;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Service.UserService;
 import jakarta.validation.Valid;
@@ -25,11 +22,16 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody UserSignupDTO userDTO) {
+  //  public ResponseEntity<?> signup(@Valid @RequestBody UserSignupDTO userDTO) {
+
+    public ResponseEntity<?> signup(@Valid @RequestBody UserSignupDTO userDTO){
         try {
             User user = userService.signup(userDTO);
-            return ResponseEntity.ok(new SignupResponse(true, user.getId(), "User created successfully"));
-        } catch (RuntimeException e) {
+            return ResponseEntity.ok(new ApiResponse<>(true, "User created successfully", new SignupResponse(user.getId())) );
+           //  return  ResponseEntity.ok(new ApiResponse<>(true,"user created succesfully ",new LoginResponse()));
+        }
+        catch (RuntimeException e) {
+
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
@@ -39,6 +41,7 @@ public class AuthController {
         try {
             String token = userService.login(loginDTO);
             return ResponseEntity.ok(new LoginResponse(true, token, "Login successful"));
+           // return ResponseEntity.ok(new ApiResponse<>(true,"Login is successful",new LoginResponse(token)));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

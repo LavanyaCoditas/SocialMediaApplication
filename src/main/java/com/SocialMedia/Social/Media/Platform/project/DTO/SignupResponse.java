@@ -8,9 +8,9 @@ import lombok.*;
 @Setter
 @Getter
 public class SignupResponse {
-    private boolean success;
+   // private boolean success;
     private Long userId;
-    private String message;
+   // private String message;
 
 
 

@@ -39,7 +39,7 @@ public class ModeratorController {
     @GetMapping("/posts/blocked")
     public ResponseEntity<List<Posts>> getBlockedPosts() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(postService .getBlockedPosts(username));
+        return ResponseEntity.ok(postService .getBlockedPostsByModerator(username));
     }
 
 }

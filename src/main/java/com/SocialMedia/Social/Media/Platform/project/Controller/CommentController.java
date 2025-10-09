@@ -1,5 +1,7 @@
 package com.SocialMedia.Social.Media.Platform.project.Controller;
 
+import com.SocialMedia.Social.Media.Platform.project.DTO.CommentOfUserDto;
+import com.SocialMedia.Social.Media.Platform.project.DTO.CommentResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Comments;
 import com.SocialMedia.Social.Media.Platform.project.Service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<Comments> editComment(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String content = body.get("content");
@@ -43,31 +45,33 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable Long id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         commentService.deleteComment(id, username);
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<List<Comments>> getApprovedCommentsForPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(commentService.getApprovedCommentsForPost(postId));
+    @GetMapping("/post/approved/{postId}")
+    public List<CommentResponse> getApprovedCommentsForPost(@PathVariable Long postId) {
+        return commentService.getApprovedCommentsForPost(postId);
     }
 
+    //return all the comments
     @GetMapping("/profile")
-    public ResponseEntity<List<Comments>> getUserComments() {
+    public ResponseEntity<List<CommentOfUserDto>> getUserComments() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(commentService.getUserComments(username));
     }
 
-    // Get all comments (all statuses) - restrict to moderators/super admins
+    //gets all comments only accessible to super admin and moderator
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('MODERATOR', 'SUPER_ADMIN')")
-    public ResponseEntity<List<Comments>> getAllComments() {
+    public ResponseEntity<List<CommentOfUserDto>> getAllComments() {
         return ResponseEntity.ok(commentService.getAllComments());
     }
 
+    //this is done by moderator only
     @PostMapping("/{id}/approve")
     public ResponseEntity<?> approveComment(@PathVariable Long id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -83,12 +87,12 @@ public class CommentController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<Comments>> getPendingComments() {
+    public ResponseEntity<List<CommentOfUserDto>> getPendingComments() {
         return ResponseEntity.ok(commentService.getPendingComments());
     }
 
     @GetMapping("/blocked")
-    public ResponseEntity<List<Comments>> getBlockedComments() {
+    public ResponseEntity<List<CommentOfUserDto>> getBlockedComments() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(commentService.getBlockedComments(username));
     }

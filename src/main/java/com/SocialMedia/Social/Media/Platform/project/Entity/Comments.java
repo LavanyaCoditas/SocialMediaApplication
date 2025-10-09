@@ -1,9 +1,7 @@
 package com.SocialMedia.Social.Media.Platform.project.Entity;
 
 
-import com.SocialMedia.Social.Media.Platform.project.Entity.CommentStatus;
-import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
-import com.SocialMedia.Social.Media.Platform.project.Entity.User;
+import com.SocialMedia.Social.Media.Platform.project.Constants.CommentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,7 +33,7 @@ public class Comments { // Renamed to singular "Comment"
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private CommentStatus status = CommentStatus.PENDING; // Default  status whena  new comment is created is set to PENDING
+    private CommentStatus status = CommentStatus.PENDING; // Default  status when  new comment is created is set to PENDING
 
     @ElementCollection
     private List<String> approvedBy = new ArrayList<>(); // Moderator's ID who approved- to get the list for the moderator about what comment he has approved

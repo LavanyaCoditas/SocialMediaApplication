@@ -1,6 +1,7 @@
 package com.SocialMedia.Social.Media.Platform.project.Repository;
 
-import com.SocialMedia.Social.Media.Platform.project.Entity.CommentStatus;
+import com.SocialMedia.Social.Media.Platform.project.Constants.CommentStatus;
+import com.SocialMedia.Social.Media.Platform.project.DTO.CommentResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Comments;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;

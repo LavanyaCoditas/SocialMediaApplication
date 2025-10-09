@@ -2,7 +2,7 @@ package com.SocialMedia.Social.Media.Platform.project.Service;
 
 import com.SocialMedia.Social.Media.Platform.project.DTO.LoginDTO;
 import com.SocialMedia.Social.Media.Platform.project.DTO.UserSignupDTO;
-import com.SocialMedia.Social.Media.Platform.project.Entity.Role;
+import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService {

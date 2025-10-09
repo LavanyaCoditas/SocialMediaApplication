@@ -1,8 +1,10 @@
 package com.SocialMedia.Social.Media.Platform.project.Service;
 
 
+import com.SocialMedia.Social.Media.Platform.project.DTO.ApprovedPostResponse;
+import com.SocialMedia.Social.Media.Platform.project.DTO.DisapprovedPostListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
-import com.SocialMedia.Social.Media.Platform.project.Entity.PostStatus;
+import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
@@ -51,6 +53,7 @@ public class PostService {
     public Posts approvePost(Long id, String moderatorUsername) {
         Posts post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         User moderator = userRepo.findByUsername(moderatorUsername);
+        //check
         if (!post.getApprovedBy().contains(moderator.getId().toString())) {
             post.getApprovedBy().add(moderator.getId().toString());
         }
@@ -72,8 +75,19 @@ public class PostService {
         return postRepo.save(post);
     }
 
-    public List<Posts> getApprovedPosts() {
-        return postRepo.findByStatusOrderById(PostStatus.APPROVED);
+    public List<ApprovedPostResponse> getApprovedPosts() {
+        List<Posts>listofPosts=postRepo.findByStatus(PostStatus.APPROVED);
+        List<ApprovedPostResponse> response = new ArrayList<>();
+        for(int i = 0; i < listofPosts.size(); i++){
+            Long id = listofPosts.get(i).getId();
+            String title = listofPosts.get(i).getTitle();
+            String content = listofPosts.get(i).getContent();
+            String username = listofPosts.get(i).getUser().getUsername();
+
+            response.add(new ApprovedPostResponse(id, title, content, username));
+        }
+
+        return response;
     }
 
     public List<Posts> getUserPosts(String username) {
@@ -82,11 +96,29 @@ public class PostService {
     }
 
     public List<Posts> getPendingPosts() {
-        return postRepo.findByStatusOrderById(PostStatus.PENDING);
+        return postRepo.findByStatus(PostStatus.PENDING);
     }
 
-    public List<Posts> getBlockedPosts(String username) {
+
+    public List<Posts> getBlockedPostsByModerator(String username) {
         User user = userRepo.findByUsername(username);
         return postRepo.findByDisapprovedByContaining(user.getId().toString());
+    }
+
+    public List<DisapprovedPostListDto> getUsersDeniedPosts(String username)
+    {
+        User user = userRepo.findByUsername(username);
+        List<Posts>listOfDenied = postRepo.findByUserUsernameAndStatusOrderById(username,PostStatus.BLACKLISTED);
+        List<DisapprovedPostListDto> response= new ArrayList<>();
+
+        for (int i = 0; i < listOfDenied.size(); i++) {
+            Long id = listOfDenied.get(i).getId();
+            String title = listOfDenied.get(i).getTitle();
+            String content = listOfDenied.get(i).getContent();
+            String userName = listOfDenied.get(i).getUser().getUsername();
+
+            response.add(new DisapprovedPostListDto(id, title, content, userName));
+        }
+        return response;
     }
 }

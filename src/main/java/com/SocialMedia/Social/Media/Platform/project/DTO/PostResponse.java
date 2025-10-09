@@ -1,7 +1,6 @@
 package com.SocialMedia.Social.Media.Platform.project.DTO;
 
-import com.SocialMedia.Social.Media.Platform.project.Entity.PostStatus;
-import jakarta.validation.constraints.NotBlank;
+import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import lombok.*;
 
 @Data

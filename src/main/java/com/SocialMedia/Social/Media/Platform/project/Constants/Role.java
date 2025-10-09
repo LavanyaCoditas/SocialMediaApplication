@@ -1,12 +1,9 @@
-package com.SocialMedia.Social.Media.Platform.project.Entity;
+package com.SocialMedia.Social.Media.Platform.project.Constants;
 
 public enum Role {
 
    ROLE_USER,
     ROLE_SUPER_ADMIN,
     ROLE_MODERATOR;
-
-
-
 
 }

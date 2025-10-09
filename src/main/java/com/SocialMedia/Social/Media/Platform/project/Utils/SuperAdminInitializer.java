@@ -1,6 +1,6 @@
 //package com.SocialMedia.Social.Media.Platform.project.Utils;
 //
-//import com.SocialMedia.Social.Media.Platform.project.Entity.Role;
+//import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 //import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 //import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 //import jakarta.transaction.Transactional;

@@ -8,9 +8,9 @@ import lombok.*;
 @Getter
 @Setter
 public class LoginResponse {
-    private boolean success;
+   private boolean success;
     private String token;
-    private String message;
+   private String message;
 
 
 }
