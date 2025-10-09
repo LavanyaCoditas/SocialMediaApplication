@@ -10,6 +10,7 @@ import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -50,30 +51,6 @@ public class PostService {
         return postRepo.save(post);
     }
 
-    public Posts approvePost(Long id, String moderatorUsername) {
-        Posts post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        User moderator = userRepo.findByUsername(moderatorUsername);
-        //check
-        if (!post.getApprovedBy().contains(moderator.getId().toString())) {
-            post.getApprovedBy().add(moderator.getId().toString());
-        }
-        if (post.getApprovedBy().size() >= 1 && post.getDisapprovedBy().isEmpty()) {
-            post.setStatus(PostStatus.APPROVED);
-        }
-        return postRepo.save(post);
-    }
-
-    public Posts disapprovePost(Long id, String moderatorUsername) {
-        Posts post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        User moderator = userRepo.findByUsername(moderatorUsername);
-        if (!post.getDisapprovedBy().contains(moderator.getId().toString())) {
-            post.getDisapprovedBy().add(moderator.getId().toString());
-        }
-        if (post.getDisapprovedBy().size() >= 1) {
-            post.setStatus(PostStatus.BLACKLISTED);
-        }
-        return postRepo.save(post);
-    }
 
     public List<ApprovedPostResponse> getApprovedPosts() {
         List<Posts>listofPosts=postRepo.findByStatus(PostStatus.APPROVED);
@@ -90,21 +67,18 @@ public class PostService {
         return response;
     }
 
-    public List<Posts> getUserPosts(String username) {
+    public List<PostDto> getUserPosts(String username) {
         User user = userRepo.findByUsername(username);
-        return postRepo.findByUser(user);
+        List <Posts> list = postRepo.findByUser(user);
+        List <PostDto> response = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            String title = list.get(i).getTitle();
+            String content = list.get(i).getContent();
+            response.add(new PostDto(title,content));
+        }
+        return  response;
+
     }
-
-    public List<Posts> getPendingPosts() {
-        return postRepo.findByStatus(PostStatus.PENDING);
-    }
-
-
-    public List<Posts> getBlockedPostsByModerator(String username) {
-        User user = userRepo.findByUsername(username);
-        return postRepo.findByDisapprovedByContaining(user.getId().toString());
-    }
-
     public List<DisapprovedPostListDto> getUsersDeniedPosts(String username)
     {
         User user = userRepo.findByUsername(username);
@@ -120,5 +94,20 @@ public class PostService {
             response.add(new DisapprovedPostListDto(id, title, content, userName));
         }
         return response;
+    }
+
+    public void deletePost(Long postId, String currentUsername) {
+        User currentUser = userRepo.findByUsername(currentUsername);
+        if(currentUser==null){
+            throw new RuntimeException("No such user exits");
+        }
+
+        Posts post = postRepo.findById(postId).orElseThrow(()
+                -> new RuntimeException("No post present for given post ID"));
+
+        if(currentUser.getEmail().equals(post.getUser().getEmail())) {
+            postRepo.delete(post);
+        }
+        throw new RuntimeException("User can only delete their own posts");
     }
 }

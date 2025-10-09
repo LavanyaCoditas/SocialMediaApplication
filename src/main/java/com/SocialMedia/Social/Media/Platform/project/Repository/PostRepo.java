@@ -18,4 +18,6 @@ public interface PostRepo extends JpaRepository<Posts,Long> {
 
     //method to find the posts based on the user and the status of posts
     List<Posts> findByUserUsernameAndStatusOrderById(String username, PostStatus status);
+
+    List<Posts> findByUserUsername(String username);
 }

@@ -4,6 +4,8 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.DisapprovedPostListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
+import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
+import com.SocialMedia.Social.Media.Platform.project.Service.ModeratorService;
 import com.SocialMedia.Social.Media.Platform.project.Service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -21,15 +24,19 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+    @Autowired
+    PostRepo postRepo;
+    @Autowired
+    ModeratorService moderatorService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createPost(@Valid @RequestBody PostDto postDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Posts post = postService.createPost(postDto, username);
         return ResponseEntity.ok(new PostResponse(post.getId(), post.getStatus()));
     }
-   //change endpoint name is not readable  , exposing of id in path , remove path variable , remove fetch of username
-    @PutMapping("/{id}")
+
+    @PutMapping("update/{id}")
     public ResponseEntity<?> editPost(@PathVariable Long id, @Valid @RequestBody PostDto postDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Posts post = postService.editPost(id, postDto, username);
@@ -43,7 +50,7 @@ public class PostController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getUserPosts() {
+    public ResponseEntity<List<PostDto>>getUserPosts() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(postService.getUserPosts(username));
     }
@@ -52,15 +59,21 @@ public class PostController {
     public List<Posts> getDisapprovedPosts()
     {String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return postService.getBlockedPostsByModerator(currentUsername);
+        return moderatorService.getBlockedPostsByModerator(currentUsername);
     }
 
-    //users own posts which are denied approval
+    //users own posts which have been denied approval
     @GetMapping("/denied")
     public List<DisapprovedPostListDto> getDeniedPosts()
     {
         String username= SecurityContextHolder.getContext().getAuthentication().getName();
         return postService.getUsersDeniedPosts(username);
     }
+
+    @DeleteMapping("/{post_id}")
+public void deletePost (@PathVariable Long post_id) {
+    String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+    postService.deletePost(post_id, currentUserName);
+}
 
 }

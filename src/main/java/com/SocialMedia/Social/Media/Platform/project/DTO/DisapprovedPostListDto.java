@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 public class DisapprovedPostListDto {
     private Long id;
 
-
-
     private String title;
 
 
