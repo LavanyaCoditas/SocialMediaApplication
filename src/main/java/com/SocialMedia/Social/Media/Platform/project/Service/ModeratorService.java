@@ -20,48 +20,49 @@ public class ModeratorService {
     @Autowired
     UserRepo userRepo;
 
-@Transactional
-public Posts approvePost(Long id) {
-    // Fetch post
-    Posts post = postRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+    @Transactional
+    public Posts approvePost(Long id) {
+        // Fetch post
+        Posts post = postRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
 
-    // Get authenticated user
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    if (username == null || username.isEmpty()) {
-        throw new RuntimeException("No authenticated user found in security context");
-    }
-
-    // Fetch moderator
-    User moderator = userRepo.findByUsername(username);
-    if (moderator == null) {
-        throw new RuntimeException("Moderator not found with email: " + username);
-    }
-
-    // author cant approve own post
-    User postUser = post.getUser();
-    if (postUser != null && postUser.getUsername().equals(moderator.getUsername())) {
-        throw new RuntimeException("Moderators cannot approve their own posts!");
-    }
-
-    if (post.getApprovedBy() == null) {
-        post.setApprovedBy(new ArrayList<>());
-    }
-    if (post.getDisapprovedBy() == null) {
-        post.setDisapprovedBy(new ArrayList<>());
-    }
-    if (post.getDisapprovedBy().isEmpty()) {
-        post.getApprovedBy().add(moderator.getUsername());
-        if (post.getApprovedBy().size() >= 1) {
-            post.setStatus(PostStatus.APPROVED);
+        // Get authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (username == null || username.isEmpty()) {
+            throw new RuntimeException("No authenticated user found in security context");
         }
-    } else {
-        throw new RuntimeException("Post cannot be approved: It has been disapproved");
+
+        // Fetching the moderator
+        User moderator = userRepo.findByUsername(username);
+        if (moderator == null) {
+            throw new RuntimeException("Moderator not found with username: " + username);
+        }
+
+        // Author can't approve own post
+        User postUser = post.getUser();
+        if (postUser != null && postUser.getUsername().equals(moderator.getUsername())) {
+            throw new RuntimeException("Moderators cannot approve their own posts!");
+        }
+
+        // Initializing lists if null
+        if (post.getApprovedBy() == null) {
+            post.setApprovedBy(new ArrayList<>());
+        }
+        if (post.getDisapprovedBy() == null) {
+            post.setDisapprovedBy(new ArrayList<>());
+        }
+
+        if (!post.getApprovedBy().contains(moderator.getUsername())) {
+            post.getApprovedBy().add(moderator.getUsername());
+            if (post.getApprovedBy().size() >= 1) {
+                post.setStatus(PostStatus.APPROVED);
+                // Optionally clear disapprovals if post is approved
+                post.getDisapprovedBy().clear();
+            }
+        }
+
+        return postRepo.save(post);
     }
-
-    return postRepo.save(post);
-}
-
     @Transactional
     public Posts disapprovePost(Long id) {
         // Fetch post
@@ -86,41 +87,44 @@ public Posts approvePost(Long id) {
             throw new RuntimeException("Moderators cannot disapprove their own posts!");
         }
 
-        // Disapproval logic
+        // Initialize lists if null
         if (post.getApprovedBy() == null) {
             post.setApprovedBy(new ArrayList<>());
         }
         if (post.getDisapprovedBy() == null) {
             post.setDisapprovedBy(new ArrayList<>());
         }
-        if (post.getApprovedBy().isEmpty()) {
+
+        // Disapproval logic
+        //this if block return true only if the name of moderator is not present in the disapprovedByList
+        if (!post.getDisapprovedBy().contains(moderator.getUsername())) {
             post.getDisapprovedBy().add(moderator.getUsername());
             if (post.getDisapprovedBy().size() >= 1) {
                 post.setStatus(PostStatus.BLACKLISTED);
+                //clear the approved list
+                post.getApprovedBy().clear();
             }
-        } else {
-            throw new RuntimeException("Post cannot be disapproved: It has been approved");
         }
 
         return postRepo.save(post);
     }
 
-    public List<Posts> getBlockedPostsByModerator(String username)
-    {
+    public List<Posts> getBlockedPostsByModerator(String username) {
         User user = userRepo.findByUsername(username);
-        return postRepo.findByDisapprovedByContaining(user.getId().toString());
+        if (user == null) {
+            throw new RuntimeException("User not found with username: " + username);
+        }
+
+        return postRepo.findByDisapprovedByContaining(user.getUsername());
     }
 
-    public List<PostDto> getPendingPosts()
-    {
-        List<Posts> list= postRepo.findByStatus(PostStatus.PENDING);
+    public List<PostDto> getPendingPosts() {
+        List<Posts> list = postRepo.findByStatus(PostStatus.PENDING);
         List<PostDto> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            String title = list.get(i).getTitle();
-            String content = list.get(i).getContent();
-            response.add(new PostDto(title,content));
-
+        for (Posts post : list) {
+            response.add(new PostDto(post.getTitle(), post.getContent()));
         }
         return response;
     }
+
 }

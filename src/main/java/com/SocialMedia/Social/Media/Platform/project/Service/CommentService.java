@@ -9,6 +9,7 @@ import com.SocialMedia.Social.Media.Platform.project.Entity.*;
 import com.SocialMedia.Social.Media.Platform.project.Repository.CommentRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,12 +71,36 @@ public class CommentService {
         commentRepo.delete(comment);
     }
 
+    @Transactional
     public Comments approveComment(Long id, String moderatorUsername) {
-        Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+        // Fetch comment
+        Comments comment = commentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
+
+        // Fetch moderator
         User moderator = userRepo.findByUsername(moderatorUsername);
-        if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
-            throw new RuntimeException("Unauthorized acces : Only moderators or super admins can approve");
+        if (moderator == null) {
+            throw new RuntimeException("Moderator not found with username: " + moderatorUsername);
         }
+        if (!(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
+            throw new RuntimeException("Unauthorized access: Only moderators or super admins can approve");
+        }
+
+        // Prevent moderator from approving their own comment
+        User commentUser = comment.getUser();
+        if (commentUser != null && commentUser.getUsername().equals(moderator.getUsername())) {
+            throw new RuntimeException("Moderators cannot approve their own comments!");
+        }
+
+        // Initialize lists if null
+        if (comment.getApprovedBy() == null) {
+            comment.setApprovedBy(new ArrayList<>());
+        }
+        if (comment.getDisapprovedBy() == null) {
+            comment.setDisapprovedBy(new ArrayList<>());
+        }
+
+        // Approval logic
         String moderatorId = moderator.getId().toString();
         if (!comment.getApprovedBy().contains(moderatorId)) {
             comment.getApprovedBy().add(moderatorId);
@@ -83,8 +108,24 @@ public class CommentService {
         if (comment.getApprovedBy().size() >= 1 && comment.getDisapprovedBy().isEmpty()) {
             comment.setStatus(CommentStatus.APPROVED);
         }
+
         return commentRepo.save(comment);
     }
+//    public Comments approveComment(Long id, String moderatorUsername) {
+//        Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+//        User moderator = userRepo.findByUsername(moderatorUsername);
+//        if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
+//            throw new RuntimeException("Unauthorized acces : Only moderators or super admins can approve");
+//        }
+//        String moderatorId = moderator.getId().toString();
+//        if (!comment.getApprovedBy().contains(moderatorId)) {
+//            comment.getApprovedBy().add(moderatorId);
+//        }
+//        if (comment.getApprovedBy().size() >= 1 && comment.getDisapprovedBy().isEmpty()) {
+//            comment.setStatus(CommentStatus.APPROVED);
+//        }
+//        return commentRepo.save(comment);
+//    }
     public Comments disapproveComment(Long id, String moderatorUsername) {
         Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
         User moderator = userRepo.findByUsername(moderatorUsername);

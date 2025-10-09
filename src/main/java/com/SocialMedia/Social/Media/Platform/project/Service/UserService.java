@@ -6,6 +6,7 @@ import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,26 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         return userRepo.save(user);
     }
+
+    @Transactional
+        public User makeModerator(Long userId) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setRole(Role.ROLE_MODERATOR);
+            user.setModerator(true);
+            user.setUpdatedAt(LocalDateTime.now());
+            return userRepo.save(user);
+        }
+
+        @Transactional
+        public User removeModerator(Long userId) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setRole(Role.ROLE_USER);
+            user.setModerator(false);
+            user.setUpdatedAt(LocalDateTime.now());
+            return userRepo.save(user);
+        }
 
     public User getUserById(Long id, String currentUsername) {
         User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));

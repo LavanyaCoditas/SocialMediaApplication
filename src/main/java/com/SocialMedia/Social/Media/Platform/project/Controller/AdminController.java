@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -27,10 +26,15 @@ public class AdminController {
         return ResponseEntity.ok("User updated successfully");
     }
 
+    @PostMapping("/{userId}/make-moderator")
+        public ResponseEntity<User> makeModerator(@PathVariable Long userId) {
+            User updatedUser = userService.makeModerator(userId);
+            return ResponseEntity.ok(updatedUser);
+        }
 
-    @GetMapping("/moderators")
-    public ResponseEntity<List<User>> getAllModerators() {
-        List<User> moderators = userService.getAllModerators();
-        return ResponseEntity.ok(moderators);
-    }
+        @PostMapping("/{userId}/remove-moderator")
+        public ResponseEntity<User> removeModerator(@PathVariable Long userId) {
+            User updatedUser = userService.removeModerator(userId);
+            return ResponseEntity.ok(updatedUser);
+        }
 }

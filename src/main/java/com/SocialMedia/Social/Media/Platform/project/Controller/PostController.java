@@ -56,10 +56,10 @@ public class PostController {
     }
 
     @GetMapping("/disapproved")
-    public List<Posts> getDisapprovedPosts()
+    public ResponseEntity<List<Posts>> getDisapprovedPosts()
     {String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return moderatorService.getBlockedPostsByModerator(currentUsername);
+        return ResponseEntity.ok(moderatorService.getBlockedPostsByModerator(currentUsername));
     }
 
     //users own posts which have been denied approval

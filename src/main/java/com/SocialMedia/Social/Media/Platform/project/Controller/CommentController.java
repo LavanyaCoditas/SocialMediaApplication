@@ -52,6 +52,7 @@ public class CommentController {
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
+    //fetches the comments on current post you clicked on
     @GetMapping("/post/approved/{postId}")
     public List<CommentResponse> getApprovedCommentsForPost(@PathVariable Long postId) {
         return commentService.getApprovedCommentsForPost(postId);
