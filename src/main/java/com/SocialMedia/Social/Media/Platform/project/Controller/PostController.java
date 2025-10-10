@@ -33,30 +33,32 @@ public class PostController {
     public ResponseEntity<?> createPost(@Valid @RequestBody PostDto postDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Posts post = postService.createPost(postDto, username);
-        return ResponseEntity.ok(new PostResponse(post.getId(), post.getStatus()));
+        return ResponseEntity.ok(new PostResponse(post.getId(),post.getTitle(),post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
     }
 
     @PutMapping("update/{id}")
     public ResponseEntity<?> editPost(@PathVariable Long id, @Valid @RequestBody PostDto postDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Posts post = postService.editPost(id, postDto, username);
-        return ResponseEntity.ok(new PostResponse(post.getId(), post.getStatus()));
+        return ResponseEntity.ok(new PostResponse(post.getId(),post.getTitle(),post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
     }
 
+    //live feed
     @GetMapping("/live")
     public List<ApprovedPostResponse> getApprovedPosts() {
 
         return postService.getApprovedPosts();
     }
 
+
     @GetMapping("/profile")
-    public ResponseEntity<List<PostDto>>getUserPosts() {
+    public ResponseEntity<List<PostResponse>>getUserPosts() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(postService.getUserPosts(username));
     }
 
     @GetMapping("/disapproved")
-    public ResponseEntity<List<Posts>> getDisapprovedPosts()
+    public ResponseEntity<List<PostResponse>> getDisapprovedPosts()
     {String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         return ResponseEntity.ok(moderatorService.getBlockedPostsByModerator(currentUsername));

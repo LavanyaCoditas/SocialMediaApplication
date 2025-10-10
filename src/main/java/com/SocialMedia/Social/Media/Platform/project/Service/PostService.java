@@ -5,6 +5,7 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.ApprovedPostResponse;
 import com.SocialMedia.Social.Media.Platform.project.DTO.DisapprovedPostListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
 import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
+import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,8 @@ public class PostService {
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setUser(user);
-        post.setStatus(PostStatus.PENDING); // Default per entity
+        post.setStatus(PostStatus.PENDING);
+        post.setDateTime(LocalDateTime.now());// Default per entity
         return postRepo.save(post);
     }
 
@@ -48,6 +51,7 @@ public class PostService {
         post.setApprovedBy(new ArrayList<>());
         post.setDisapprovedBy(new ArrayList<>());
         post.setStatus(PostStatus.PENDING);
+        post.setDateTime(LocalDateTime.now());
         return postRepo.save(post);
     }
 
@@ -61,20 +65,26 @@ public class PostService {
             String content = listofPosts.get(i).getContent();
             String username = listofPosts.get(i).getUser().getUsername();
 
+
             response.add(new ApprovedPostResponse(id, title, content, username));
         }
 
         return response;
     }
 
-    public List<PostDto> getUserPosts(String username) {
+    public List<PostResponse> getUserPosts(String username) {
         User user = userRepo.findByUsername(username);
         List <Posts> list = postRepo.findByUser(user);
-        List <PostDto> response = new ArrayList<>();
+        List <PostResponse> response = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
+            Long postid= list.get(i).getId();
             String title = list.get(i).getTitle();
             String content = list.get(i).getContent();
-            response.add(new PostDto(title,content));
+            PostStatus status= list.get(i).getStatus();
+            LocalDateTime dateTime = list.get(i).getDateTime();
+            Long userId = list.get(i).getId();
+            String user_name=list.get(i).getUser().getUsername();
+            response.add(new PostResponse(postid,title,content,status,dateTime,userId,user_name));
         }
         return  response;
 

@@ -60,7 +60,7 @@ public class CommentController {
 
     //return all the comments
     @GetMapping("/profile")
-    public ResponseEntity<List<CommentOfUserDto>> getUserComments() {
+    public ResponseEntity<List<CommentResponse>> getUserComments() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(commentService.getUserComments(username));
     }
@@ -68,23 +68,8 @@ public class CommentController {
     //gets all comments only accessible to super admin and moderator
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('MODERATOR', 'SUPER_ADMIN')")
-    public ResponseEntity<List<CommentOfUserDto>> getAllComments() {
+    public ResponseEntity<List<CommentResponse>> getAllComments() {
         return ResponseEntity.ok(commentService.getAllComments());
-    }
-
-    //this is done by moderator only
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<?> approveComment(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Comments comment = commentService.approveComment(id, username);
-        return ResponseEntity.ok(Map.of("commentId", comment.getId(), "status", comment.getStatus()));
-    }
-
-    @PostMapping("/{id}/disapprove")
-    public ResponseEntity<?> disapproveComment(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Comments comment = commentService.disapproveComment(id, username);
-        return ResponseEntity.ok(Map.of("commentId", comment.getId(), "status", comment.getStatus()));
     }
 
     @GetMapping("/pending")
@@ -93,7 +78,7 @@ public class CommentController {
     }
 
     @GetMapping("/blocked")
-    public ResponseEntity<List<CommentOfUserDto>> getBlockedComments() {
+    public ResponseEntity<List<CommentResponse>> getBlockedComments() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(commentService.getBlockedComments(username));
     }

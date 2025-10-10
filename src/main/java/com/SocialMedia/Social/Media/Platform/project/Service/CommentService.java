@@ -6,6 +6,7 @@ import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.DTO.CommentOfUserDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.CommentResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.*;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.CommentNotFoundException;
 import com.SocialMedia.Social.Media.Platform.project.Repository.CommentRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
@@ -111,23 +112,9 @@ public class CommentService {
 
         return commentRepo.save(comment);
     }
-//    public Comments approveComment(Long id, String moderatorUsername) {
-//        Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
-//        User moderator = userRepo.findByUsername(moderatorUsername);
-//        if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
-//            throw new RuntimeException("Unauthorized acces : Only moderators or super admins can approve");
-//        }
-//        String moderatorId = moderator.getId().toString();
-//        if (!comment.getApprovedBy().contains(moderatorId)) {
-//            comment.getApprovedBy().add(moderatorId);
-//        }
-//        if (comment.getApprovedBy().size() >= 1 && comment.getDisapprovedBy().isEmpty()) {
-//            comment.setStatus(CommentStatus.APPROVED);
-//        }
-//        return commentRepo.save(comment);
-//    }
+
     public Comments disapproveComment(Long id, String moderatorUsername) {
-        Comments comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+        Comments comment = commentRepo.findById(id).orElseThrow(() -> new CommentNotFoundException("Comment not found"));
         User moderator = userRepo.findByUsername(moderatorUsername);
         if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
             throw new RuntimeException("Unauthorized: Only moderators or super admins can disapprove");
@@ -151,24 +138,32 @@ public class CommentService {
         List<CommentResponse> response = new ArrayList<>();
         for (int i = 0; i < commentsList.size(); i++)
         {
+            Long id =commentsList.get(i).getId();
           String content = commentsList.get(i).getContent().toString();
-          Long userId= commentsList.get(i).getUser().getId();
-          response.add(new CommentResponse(content,userId));
+            String status = commentsList.get(i).getStatus().toString();
+          String username= commentsList.get(i).getUser().getUsername();
+          response.add(new CommentResponse(id,content,status,postId,username));
         }
         return response;
     }
 
-    public List<CommentOfUserDto> getUserComments(String username) {
+    public List<CommentResponse> getUserComments(String username) {
         User user = userRepo.findByUsername(username);
         Long id = user.getId();
         List<Comments> list = userRepo.findById(id).get().getCommentsList();
-        List<CommentOfUserDto> response = new ArrayList<>();
+        List<CommentResponse> response = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             String content = list.get(i).getContent();
             Long commentId= list.get(i).getId();
             String status=list.get(i).getStatus().toString();
-            response.add(new CommentOfUserDto(content,commentId,status));
+            Long postId =list.get(i).getPost().getId();
+            response.add(new CommentResponse(commentId,content,status,postId,username));
         }
+        //private Long id;
+        //    private String content;
+        //    private String status;
+        //    private Long postId;
+        //    private String username;
         return response;
     }
 
@@ -186,34 +181,38 @@ public class CommentService {
     }
 
 
-    public List<CommentOfUserDto> getBlockedComments(String moderatorUsername)
+    public List<CommentResponse> getBlockedComments(String moderatorUsername)
     {
         User moderator = userRepo.findByUsername(moderatorUsername);
         if (moderator == null || !(moderator.getRole() == Role.ROLE_MODERATOR || moderator.getRole() == Role.ROLE_SUPER_ADMIN)) {
             throw new RuntimeException("Unauthorized: Only moderators or super admins can view blocked comments");
         }
         List<Comments> list=commentRepo.findByDisapprovedByContaining(moderator.getId().toString());
-        List<CommentOfUserDto> response=new ArrayList<>();
+        List<CommentResponse> response=new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             String content = list.get(i).getContent();
             Long commentId= list.get(i).getId();
             String status=list.get(i).getStatus().toString();
-            response.add(new CommentOfUserDto(content,commentId,status));
+            String username= list.get(i).getUser().getUsername();
+            Long postId =list.get(i).getPost().getId();
+            response.add(new CommentResponse(commentId,content,status,postId,username));
         }
         return response;
 
     }
 
-    public List<CommentOfUserDto> getAllComments()
+    public List<CommentResponse> getAllComments()
     {
         List<Comments> list= commentRepo.findAll();
 
-        List<CommentOfUserDto> response = new ArrayList<>();
+        List<CommentResponse> response = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             String content = list.get(i).getContent();
+           String username= list.get(i).getUser().getUsername();
             Long commentId= list.get(i).getId();
             String status=list.get(i).getStatus().toString();
-            response.add(new CommentOfUserDto(content,commentId,status));
+            Long postId =list.get(i).getPost().getId();
+            response.add(new CommentResponse(commentId,content,status,postId,username));
         }
         return response;
 

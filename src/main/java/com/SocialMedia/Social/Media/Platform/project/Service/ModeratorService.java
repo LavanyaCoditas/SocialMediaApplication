@@ -2,6 +2,7 @@ package com.SocialMedia.Social.Media.Platform.project.Service;
 
 import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
+import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
@@ -109,20 +110,24 @@ public class ModeratorService {
         return postRepo.save(post);
     }
 
-    public List<Posts> getBlockedPostsByModerator(String username) {
+    public List<PostResponse> getBlockedPostsByModerator(String username) {
         User user = userRepo.findByUsername(username);
         if (user == null) {
             throw new RuntimeException("User not found with username: " + username);
         }
-
-        return postRepo.findByDisapprovedByContaining(user.getUsername());
+       List<Posts>list= postRepo.findByDisapprovedByContaining(user.getUsername());
+        List<PostResponse> response = new ArrayList<>();
+        for (Posts post : list) {
+            response.add(new PostResponse(post.getId(), post.getTitle(), post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
+        }
+        return response;
     }
 
-    public List<PostDto> getPendingPosts() {
+    public List<PostResponse> getPendingPosts() {
         List<Posts> list = postRepo.findByStatus(PostStatus.PENDING);
-        List<PostDto> response = new ArrayList<>();
+        List<PostResponse> response = new ArrayList<>();
         for (Posts post : list) {
-            response.add(new PostDto(post.getTitle(), post.getContent()));
+            response.add(new PostResponse(post.getId(), post.getTitle(), post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
         }
         return response;
     }

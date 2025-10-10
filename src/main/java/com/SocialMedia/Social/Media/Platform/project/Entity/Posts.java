@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,11 +23,13 @@ public class Posts {
     private Long id;
 
     @NotBlank
-
     private String title;
 
     @NotBlank
     private String content;
+
+    @Column(name = "createdAt")
+    private LocalDateTime dateTime;
 
     @ManyToOne
     @JoinColumn(name = "user")

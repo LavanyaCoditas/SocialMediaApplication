@@ -7,6 +7,7 @@ import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class UserService {
     public User signup(UserSignupDTO userDTO) {
         // Check for existing username or email
         if (userRepo.findByUsername(userDTO.getUsername()) != null) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("User already exists");
         }
         if (userRepo.findByEmail(userDTO.getEmail()) != null) {
             throw new RuntimeException("Email already exists");

@@ -9,7 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentResponse {
+    private Long id;
     private String content;
-
-    private Long userId;
+    private String status;
+    private Long postId;
+    private String username;
 }
+// final int id;
+//  final String content;
+//  final String status;
+//  final int postId;
+//  final String username;

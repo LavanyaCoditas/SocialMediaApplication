@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentOfUserDto {
     private String content;
-
     private Long postId;
     private String status;
 }
