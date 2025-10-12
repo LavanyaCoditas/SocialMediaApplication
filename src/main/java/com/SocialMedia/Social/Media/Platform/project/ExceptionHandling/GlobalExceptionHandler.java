@@ -36,17 +36,9 @@ public class GlobalExceptionClass {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler(MalformedJwtException.class)
-//    public ResponseEntity<Object> handleInvalidPassword(MalformedJwtException ex, WebRequest request) {
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("timestamp", LocalDateTime.now());
-//        body.put("message", ex.getMessage());
-//        body.put("status", HttpStatus.UNAUTHORIZED.value());
-//        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
-//    }
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+    @ExceptionHandler(UserNameAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(UserNameAlreadyExistsException ex) {
         Map<String, Object> errors = new HashMap<>();
         errors.put("timestamp", LocalDateTime.now());
         errors.put("email", ex.getMessage());
