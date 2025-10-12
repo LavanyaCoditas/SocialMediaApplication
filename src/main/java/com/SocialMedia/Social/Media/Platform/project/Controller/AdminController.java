@@ -19,12 +19,6 @@ public class AdminController {
     private UserService userService;
 
 
-    @PutMapping("/moderators/{userId}")
-    public ResponseEntity<?> makeModerator(@PathVariable Long userId, @RequestBody ModeratorActionDTO actionDTO)
-    {
-        User user = userService.makeModerator(userId, actionDTO.getAction());
-        return ResponseEntity.ok("User updated successfully");
-    }
 
     @PostMapping("/{userId}/make-moderator")
         public ResponseEntity<User> makeModerator(@PathVariable Long userId) {

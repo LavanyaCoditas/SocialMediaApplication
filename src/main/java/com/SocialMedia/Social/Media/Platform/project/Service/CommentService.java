@@ -76,7 +76,7 @@ public class CommentService {
     public Comments approveComment(Long id, String moderatorUsername) {
         // Fetch comment
         Comments comment = commentRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found with id " + id));
 
         // Fetch moderator
         User moderator = userRepo.findByUsername(moderatorUsername);

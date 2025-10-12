@@ -5,7 +5,6 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
-import com.SocialMedia.Social.Media.Platform.project.Service.ModeratorService;
 import com.SocialMedia.Social.Media.Platform.project.Service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -26,8 +24,7 @@ public class PostController {
     private PostService postService;
     @Autowired
     PostRepo postRepo;
-    @Autowired
-    ModeratorService moderatorService;
+
 
     @PostMapping("/create")
     public ResponseEntity<?> createPost(@Valid @RequestBody PostDto postDto) {
@@ -61,7 +58,7 @@ public class PostController {
     public ResponseEntity<List<PostResponse>> getDisapprovedPosts()
     {String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return ResponseEntity.ok(moderatorService.getBlockedPostsByModerator(currentUsername));
+        return ResponseEntity.ok(postService.getBlockedPostsByModerator(currentUsername));
     }
 
     //users own posts which have been denied approval

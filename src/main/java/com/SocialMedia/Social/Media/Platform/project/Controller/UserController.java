@@ -22,15 +22,11 @@ public class UserController {
     @GetMapping("current/user/{id}")
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        try {
+
             User user = userService.getUserById(id, currentUsername);
             return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("User not found")) {
-                return ResponseEntity.status(404).body(Map.of("message", "User not found"));
-            }
-            return ResponseEntity.status(403).body(Map.of("message", "Unauthorized access"));
-        }
+
+
     }
 
     @DeleteMapping("delete/{id}")

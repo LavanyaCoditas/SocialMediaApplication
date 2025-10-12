@@ -4,11 +4,16 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.LoginDTO;
 import com.SocialMedia.Social.Media.Platform.project.DTO.UserSignupDTO;
 import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.EmailAlreadyExistException;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.InvalidPasswordException;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNameAlreadyExistsException;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNotFoundException;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +34,17 @@ public class UserService {
     public User signup(UserSignupDTO userDTO) {
         // Check for existing username or email
         if (userRepo.findByUsername(userDTO.getUsername()) != null) {
-            throw new RuntimeException("User already exists");
+            throw new UserNameAlreadyExistsException("username exists");
         }
         if (userRepo.findByEmail(userDTO.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistException("Email already exists");
         }
 
-        // Create new user
+
         User user = new User();
-         // Generate positive Long ID
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Hash password
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Hash the password
 
         user.setRole(Role.ROLE_USER); // Default role
         user.setModerator(false); // Default moderator status
@@ -55,30 +59,17 @@ public class UserService {
         User user = userRepo.findByEmail(loginDTO.getEmail());
         if(user == null || !passwordEncoder.matches(loginDTO.getPassword(), user.getPassword()))
         {
-            throw new RuntimeException("Wrong credentials");
+            throw new InvalidPasswordException("Wrong credentials");
         }
         return authUtil.generateAccessToken(user);
     }
 
-    public User makeModerator(Long userId, String action) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        if ("make".equals(action)) {
-            user.setRole(Role.ROLE_MODERATOR);
-            user.setModerator(true);
-        } else if ("remove".equals(action)) {
-            user.setRole(Role.ROLE_USER);
-            user.setModerator(false);
-        } else {
-            throw new RuntimeException("Invalid action");
-        }
-        user.setUpdatedAt(LocalDateTime.now());
-        return userRepo.save(user);
-    }
+
 
     @Transactional
         public User makeModerator(Long userId) {
             User user = userRepo.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new UserNotFoundException("User not found"));
             user.setRole(Role.ROLE_MODERATOR);
             user.setModerator(true);
             user.setUpdatedAt(LocalDateTime.now());
@@ -88,7 +79,7 @@ public class UserService {
         @Transactional
         public User removeModerator(Long userId) {
             User user = userRepo.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new UserNotFoundException("User not found"));
             user.setRole(Role.ROLE_USER);
             user.setModerator(false);
             user.setUpdatedAt(LocalDateTime.now());
@@ -96,7 +87,7 @@ public class UserService {
         }
 
     public User getUserById(Long id, String currentUsername) {
-        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
         User currentUser = userRepo.findByUsername(currentUsername);
         if (currentUser == null) {
             throw new RuntimeException("Unauthorized access");
@@ -111,7 +102,7 @@ public class UserService {
 
     //user can delete his own profile  and super admin can also delete any user , but not th moderator
     public void deleteUser(Long id, String currentUsername) {
-        User user = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         User currentUser = userRepo.findByUsername(currentUsername);
         if (currentUser == null) {
             throw new RuntimeException("Unauthorized access");

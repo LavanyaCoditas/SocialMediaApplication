@@ -4,6 +4,7 @@ import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,18 +28,21 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
-    @Column(unique = true)
+    @NotBlank(message = "Name cannot be empty")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9._-]*$", message = "Username must start with a letter and can only contain letters, numbers, dots, underscores, or hyphens")
     private String username;
 
-    @NotBlank
-    @Email(message = "Invalid email format")
-    @Column(unique = true)
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Please provide a valid email address")
+    @Pattern(
+            regexp = "^[A-Za-z][A-Za-z0-9._-]*@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
+            message = "Email must start with a letter, should have @, have valid domain and be valid like example@gmail.com")
     private String email;
 
-    @NotBlank
 
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be between 6 and 8 characters")
     private String password;
 
     @Enumerated(EnumType.STRING)

@@ -5,17 +5,20 @@ import lombok.Data;
 
 @Data
 public class UserSignupDTO {
-    @NotBlank(message = "Username is required")
-    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
+    @NotBlank(message = "Name cannot be empty")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9._-]*$", message = "Username must start with a letter and can only contain letters, numbers, dots, underscores, or hyphens")
     private String username;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Please provide a valid email address")
+    @Pattern(
+            regexp = "^[A-Za-z][A-Za-z0-9._-]*@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
+            message = "Email must start with a letter, should have @, have valid domain and be valid like example@gmail.com")
     private String email;
 
     @NotBlank(message = "Password is required")
-//    @Size(min = 6, max = 12, message = "Password must be between 6 and 8 characters")
+   @Size(min = 6,  message = "Password must be between 6 and 8 characters")
     private String password;
 
     @NotBlank(message = "Confirm password is required")

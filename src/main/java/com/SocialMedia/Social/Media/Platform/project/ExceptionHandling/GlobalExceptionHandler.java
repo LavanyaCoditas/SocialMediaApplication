@@ -3,6 +3,7 @@ package com.SocialMedia.Social.Media.Platform.project.ExceptionHandling;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
-public class GlobalExceptionClass {
+@ControllerAdvice(basePackages = "com.SocialMedia.Social.Media.Platform.project")
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -36,12 +37,20 @@ public class GlobalExceptionClass {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(UserNameAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(UserNameAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleUserNameAlreadyExists(UserNameAlreadyExistsException ex) {
         Map<String, Object> errors = new HashMap<>();
         errors.put("timestamp", LocalDateTime.now());
-        errors.put("email", ex.getMessage());
+        errors.put("message", ex.getMessage());
+        errors.put("status", HttpStatus.CONFLICT.value());
+        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistException ex) {
+        Map<String, Object> errors = new HashMap<>();
+        errors.put("timestamp", LocalDateTime.now());
+        errors.put("message", ex.getMessage());
         errors.put("status", HttpStatus.CONFLICT.value());
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
@@ -100,8 +109,6 @@ public class GlobalExceptionClass {
         body.put("status", HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
-
-
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
@@ -111,6 +118,13 @@ public class GlobalExceptionClass {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>>handleAllOther(HttpRequestMethodNotSupportedException e, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        errorResponse.put("status", HttpStatus.METHOD_NOT_ALLOWED.value());
+        System.out.println(errorResponse);
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
 
-
+    }
 }
