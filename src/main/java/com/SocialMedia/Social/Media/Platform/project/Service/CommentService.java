@@ -3,7 +3,6 @@ package com.SocialMedia.Social.Media.Platform.project.Service;
 import com.SocialMedia.Social.Media.Platform.project.Constants.CommentStatus;
 import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
-import com.SocialMedia.Social.Media.Platform.project.DTO.CommentOfUserDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.CommentResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.*;
 import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.CommentNotFoundException;
@@ -167,15 +166,17 @@ public class CommentService {
         return response;
     }
 
-    public List<CommentOfUserDto> getPendingComments() {
+    public List<CommentResponse> getPendingComments() {
         List<Comments> list= commentRepo.findByStatusOrderById(CommentStatus.PENDING);
 
-        List<CommentOfUserDto> response = new ArrayList<>();
+        List<CommentResponse> response = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             String content = list.get(i).getContent();
             Long commentId= list.get(i).getId();
             String status=list.get(i).getStatus().toString();
-            response.add(new CommentOfUserDto(content,commentId,status));
+            String username=list.get(i).getUser().getUsername();
+            Long postId=list.get(i).getPost().getId();
+            response.add(new CommentResponse(commentId,content,status,postId,username));
         }
         return response;
     }

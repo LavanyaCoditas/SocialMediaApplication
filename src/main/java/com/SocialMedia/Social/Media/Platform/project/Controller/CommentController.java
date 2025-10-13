@@ -1,13 +1,12 @@
 package com.SocialMedia.Social.Media.Platform.project.Controller;
 
-import com.SocialMedia.Social.Media.Platform.project.DTO.CommentOfUserDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.CommentResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Comments;
 import com.SocialMedia.Social.Media.Platform.project.Service.CommentService;
+import com.SocialMedia.Social.Media.Platform.project.Utils.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +20,12 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private AppUtils appUtils;
+
     @PostMapping("/post/{postId}")
     public ResponseEntity<Comments> addComment(@PathVariable Long postId, @RequestBody Map<String, String> body) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = appUtils.fetchUsername();
         String content = body.get("content");
 
         if (content == null || content.isBlank())
@@ -36,7 +38,7 @@ public class CommentController {
 
     @PutMapping("update/{id}")
     public ResponseEntity<Comments> editComment(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = appUtils.fetchUsername();
         String content = body.get("content");
         if (content == null || content.isBlank()) {
             throw new RuntimeException("Content is required");
@@ -47,7 +49,7 @@ public class CommentController {
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = appUtils.fetchUsername();
         commentService.deleteComment(id, username);
         return ResponseEntity.ok("Comment deleted successfully");
     }
@@ -61,25 +63,26 @@ public class CommentController {
     //return all the comments
     @GetMapping("/profile")
     public ResponseEntity<List<CommentResponse>> getUserComments() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = appUtils.fetchUsername();
         return ResponseEntity.ok(commentService.getUserComments(username));
     }
 
     //gets all comments only accessible to super admin and moderator
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('MODERATOR', 'SUPER_ADMIN')")
-    public ResponseEntity<List<CommentResponse>> getAllComments() {
+    public ResponseEntity<List<CommentResponse>> getAllComments()
+    {
         return ResponseEntity.ok(commentService.getAllComments());
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<CommentOfUserDto>> getPendingComments() {
+    public ResponseEntity<List<CommentResponse>> getPendingComments() {
         return ResponseEntity.ok(commentService.getPendingComments());
     }
 
     @GetMapping("/blocked")
     public ResponseEntity<List<CommentResponse>> getBlockedComments() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = appUtils.fetchUsername();
         return ResponseEntity.ok(commentService.getBlockedComments(username));
     }
 }

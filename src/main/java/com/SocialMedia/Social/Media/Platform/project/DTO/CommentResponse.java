@@ -1,6 +1,7 @@
 package com.SocialMedia.Social.Media.Platform.project.DTO;
 
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class CommentResponse {
     private Long id;
     private String content;

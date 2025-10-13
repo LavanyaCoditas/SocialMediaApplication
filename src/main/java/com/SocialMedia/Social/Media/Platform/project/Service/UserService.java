@@ -1,6 +1,7 @@
 package com.SocialMedia.Social.Media.Platform.project.Service;
 
 import com.SocialMedia.Social.Media.Platform.project.DTO.LoginDTO;
+import com.SocialMedia.Social.Media.Platform.project.DTO.UserListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.UserSignupDTO;
 import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -114,12 +116,34 @@ public class UserService {
         userRepo.delete(user);
     }
 
-    public List<User> getAllUsers(String currentUsername) {
-      return   userRepo.findAll();
+    public List<UserListDto> getAllUsers(String currentUsername) {
+ List<User> list =  userRepo.findAll();
+ List<UserListDto> UsersList=new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+
+            Long id = list.get(i).getId();
+            String username =list.get(i).getUsername();
+            String email =list.get(i).getEmail();
+            LocalDateTime createdAt =list.get(i).getCreatedAt();
+            Role roles = list.get(i).getRole();
+            UsersList.add(new UserListDto(id,username,email,createdAt,roles));
+        }
+        return UsersList;
     }
 
-    public List<User> getAllModerators() {
-        return userRepo.findByRole(Role.ROLE_MODERATOR);
+    public List<UserListDto> getAllModerators() {
+        List<User> list= userRepo.findByRole(Role.ROLE_MODERATOR);
+        List<UserListDto> moderators = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+
+            Long id = list.get(i).getId();
+            String username =list.get(i).getUsername();
+            String email =list.get(i).getEmail();
+            LocalDateTime createdAt =list.get(i).getCreatedAt();
+            Role roles = list.get(i).getRole();
+            moderators.add(new UserListDto(id,username,email,createdAt,roles));
+        }
+        return moderators;
     }
 }
 

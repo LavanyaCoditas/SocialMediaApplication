@@ -1,8 +1,6 @@
 package com.SocialMedia.Social.Media.Platform.project.Service;
 
 
-import com.SocialMedia.Social.Media.Platform.project.DTO.ApprovedPostResponse;
-import com.SocialMedia.Social.Media.Platform.project.DTO.DisapprovedPostListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
 import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
@@ -13,7 +11,6 @@ import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -60,17 +57,18 @@ public class PostService {
     }
 
 
-    public List<ApprovedPostResponse> getApprovedPosts() {
+    public List<PostResponse> getApprovedPosts() {
         List<Posts>listofPosts=postRepo.findByStatus(PostStatus.APPROVED);
-        List<ApprovedPostResponse> response = new ArrayList<>();
+        List<PostResponse> response = new ArrayList<>();
         for(int i = 0; i < listofPosts.size(); i++){
             Long id = listofPosts.get(i).getId();
             String title = listofPosts.get(i).getTitle();
             String content = listofPosts.get(i).getContent();
+            PostStatus status = listofPosts.get(i).getStatus();
+            LocalDateTime created_at= listofPosts.get(i).getDateTime();
+            Long userId= listofPosts.get(i).getUser().getId();
             String username = listofPosts.get(i).getUser().getUsername();
-
-
-            response.add(new ApprovedPostResponse(id, title, content, username));
+            response.add(new PostResponse(id, title, content, status,created_at,userId,username));
         }
 
         return response;
@@ -93,22 +91,24 @@ public class PostService {
         return  response;
 
     }
-    public List<DisapprovedPostListDto> getUsersDeniedPosts(String username)
+    public List<PostResponse> getUsersDeniedPosts(String username)
     {
         User user = userRepo.findByUsername(username);
-        List<Posts>listOfDenied = postRepo.findByUserUsernameAndStatusOrderById(username,PostStatus.BLACKLISTED);
-        List<DisapprovedPostListDto> response= new ArrayList<>();
+        List<Posts>listofPosts = postRepo.findByUserUsernameAndStatusOrderById(username,PostStatus.BLACKLISTED);
+        List<PostResponse> response= new ArrayList<>();
 
-        for (int i = 0; i < listOfDenied.size(); i++) {
-            Long id = listOfDenied.get(i).getId();
-            String title = listOfDenied.get(i).getTitle();
-            String content = listOfDenied.get(i).getContent();
-            String userName = listOfDenied.get(i).getUser().getUsername();
+        for(int i = 0; i < listofPosts.size(); i++) {
+            Long id = listofPosts.get(i).getId();
+            String title = listofPosts.get(i).getTitle();
+            String content = listofPosts.get(i).getContent();
+            PostStatus status = listofPosts.get(i).getStatus();
+            LocalDateTime created_at = listofPosts.get(i).getDateTime();
+            Long userId = listofPosts.get(i).getUser().getId();
 
-            response.add(new DisapprovedPostListDto(id, title, content, userName));
+            response.add(new PostResponse(id, title, content, status, created_at, userId, username));
         }
         return response;
-    }
+        }
 
     public void deletePost(Long postId, String currentUsername) {
         User currentUser = userRepo.findByUsername(currentUsername);
