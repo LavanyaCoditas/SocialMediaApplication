@@ -148,7 +148,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "com.SocialMedia.Social.Media.Platform.project")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -184,7 +184,42 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
     }
 
-    // ... keep all your other existing exception handlers
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<Object> handleUnauthorizedActionException(UnauthorizedActionException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<Object> handleCommentNotFound(CommentNotFoundException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<Object> handleInvalidPassword(InvalidPasswordException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(InvalidCommentPostAssociationException.class)
+    public ResponseEntity<Object> handleInvalidCommentPostAssociationException(InvalidCommentPostAssociationException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(UserNameAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleUserNameAlreadyExists(UserNameAlreadyExistsException ex) {
@@ -198,10 +233,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllOther(Exception e) {
         Map<String, Object> data = new HashMap<>();
-        data.put("error", e.getMessage());
-        data.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new ResponseEntity<>(data, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // ... rest of your handlers
+        @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
 }

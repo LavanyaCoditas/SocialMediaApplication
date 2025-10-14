@@ -56,12 +56,9 @@ public class UserController
     @GetMapping("/moderators")
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<List<UserListDto>> getAllModerators() {
-//        String currentUsername = appUtils.fetchUsername();
-//        try {
+//
             List<UserListDto> moderators = userService.getAllModerators();
             return ResponseEntity.ok(moderators);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(403).body(Map.of("message", "Unauthorized access"));
-//        }
+//
     }
 }
