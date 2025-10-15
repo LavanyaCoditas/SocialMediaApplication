@@ -17,7 +17,8 @@ public class UserSignupDTO {
             message = "Email must start with a letter, should have @, have valid domain and be valid like example@gmail.com")
     private String email;
 
-    @NotBlank(message = "Password is required")
+  //alpha numeric , must contain at leat 1 special character and min 6 to 14
+   @NotBlank(message = "Password is required")
    @Size(min = 6,  message = "Password must be between 6 and 8 characters")
     private String password;
 

@@ -2,6 +2,7 @@ package com.SocialMedia.Social.Media.Platform.project.Entity;
 
 
 import com.SocialMedia.Social.Media.Platform.project.Constants.CommentStatus;
+import io.micrometer.core.annotation.Counted;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,11 +18,13 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comments { // Renamed to singular "Comment"
+public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "content")
     private String content;
 
     @ManyToOne
@@ -33,6 +36,7 @@ public class Comments { // Renamed to singular "Comment"
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private CommentStatus status = CommentStatus.PENDING; // Default  status when  new comment is created is set to PENDING
 
     @ElementCollection

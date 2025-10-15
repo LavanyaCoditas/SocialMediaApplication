@@ -6,9 +6,13 @@ import com.SocialMedia.Social.Media.Platform.project.Constants.PostStatus;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.PostNotFoundException;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UnauthorizedActionException;
 import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNotFoundException;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
+import com.SocialMedia.Social.Media.Platform.project.Utils.AppUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +22,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class PostService {
+public class PostService  implements com.SocialMedia.Social.Media.Platform.project.ServiceInterfaces.PostService {
 
     @Autowired
     private PostRepo postRepo;
@@ -28,24 +33,28 @@ public class PostService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    AppUtils appUtils;
+
     public Posts createPost(PostDto postDTO, String username) {
         User user = userRepo.findByUsername(username);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
         Posts post = new Posts();
+
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setUser(user);
         post.setStatus(PostStatus.PENDING);
-        post.setDateTime(LocalDateTime.now());// Default per entity
+        post.setDateTime(LocalDateTime.now());//default the status will be pending
         return postRepo.save(post);
     }
 
     public Posts editPost(Long id, PostDto postDTO, String username) {
         Posts post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         if (!post.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized");
+            throw new UnauthorizedActionException("Unauthorized");
         }
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
@@ -78,7 +87,8 @@ public class PostService {
         User user = userRepo.findByUsername(username);
         List <Posts> list = postRepo.findByUser(user);
         List <PostResponse> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < list.size(); i++)
+        {
             Long postid= list.get(i).getId();
             String title = list.get(i).getTitle();
             String content = list.get(i).getContent();
@@ -89,7 +99,6 @@ public class PostService {
             response.add(new PostResponse(postid,title,content,status,dateTime,userId,user_name));
         }
         return  response;
-
     }
     public List<PostResponse> getUsersDeniedPosts(String username)
     {
@@ -113,11 +122,11 @@ public class PostService {
     public void deletePost(Long postId, String currentUsername) {
         User currentUser = userRepo.findByUsername(currentUsername);
         if(currentUser==null){
-            throw new RuntimeException("No such user exits");
+            throw new UserNotFoundException("No such user exits");
         }
 
         Posts post = postRepo.findById(postId).orElseThrow(()
-                -> new RuntimeException("No post present for given post ID"));
+                -> new PostNotFoundException("No post present for given post ID"));
 
         if(currentUser.getEmail().equals(post.getUser().getEmail())) {
             postRepo.delete(post);
@@ -129,18 +138,18 @@ public class PostService {
         public Posts approvePost(Long id) {
             // Fetch post
             Posts post = postRepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+                    .orElseThrow(() -> new PostNotFoundException("Post not found with id " + id));
 
             // Get authenticated user
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = appUtils.fetchUsername();
             if (username == null || username.isEmpty()) {
-                throw new RuntimeException("No authenticated user found in security context");
+                throw new UserNotFoundException("No authenticated user found in security context");
             }
 
             // Fetching the moderator
             User moderator = userRepo.findByUsername(username);
             if (moderator == null) {
-                throw new RuntimeException("Moderator not found with username: " + username);
+                throw new UserNotFoundException("Moderator not found with username: " + username);
             }
 
             // Author can't approve own post
@@ -161,7 +170,7 @@ public class PostService {
                 post.getApprovedBy().add(moderator.getUsername());
                 if (post.getApprovedBy().size() >= 1) {
                     post.setStatus(PostStatus.APPROVED);
-                    // Optionally clear disapprovals if post is approved
+                    //clear disapprovals if post is approved
                     post.getDisapprovedBy().clear();
                 }
             }
@@ -172,10 +181,10 @@ public class PostService {
         public Posts disapprovePost(Long id) {
             // Fetch post
             Posts post = postRepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+                    .orElseThrow(() -> new PostNotFoundException("Post not found with id " + id));
 
-            // Get authenticated user
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            // Get  user
+            String username =appUtils.fetchUsername();
             if (username == null || username.isEmpty()) {
                 throw new UserNotFoundException("No authenticated user found in security context");
             }
@@ -183,13 +192,13 @@ public class PostService {
             // Fetch moderator
             User moderator = userRepo.findByUsername(username);
             if (moderator == null) {
-                throw new RuntimeException("Moderator not found with username: " + username);
+                throw new UserNotFoundException("Moderator not found with username: " + username);
             }
 
             // Author can't disapprove own post
             User postUser = post.getUser();
             if (postUser != null && postUser.getUsername().equals(moderator.getUsername())) {
-                throw new RuntimeException("Moderators cannot disapprove their own posts!");
+                throw new UserNotFoundException("Moderators cannot disapprove their own posts!");
             }
 
 
@@ -239,7 +248,23 @@ public class PostService {
             }
             return response;
         }
+//use stream wherveer possible
+    public List<PostResponse> getPosts(String username) {
+        User user = userRepo.findByUsername(username);
+        List<Posts> list = postRepo.findByUser(user);
 
+        return list.stream()
+                .map(post -> new PostResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getStatus(),
+                        post.getDateTime(),
+                        post.getUser().getId(),
+                        post.getUser().getUsername()
+                ))
+                .collect(Collectors.toList());
+    }
     }
 
 

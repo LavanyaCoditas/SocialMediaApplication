@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class PostResponse {
 
     private Long postId;
@@ -20,8 +21,5 @@ public class PostResponse {
     private LocalDateTime created_at;
     private Long userId;
     private String username;
-
-
-
 
 }

@@ -5,10 +5,7 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.UserListDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.UserSignupDTO;
 import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
-import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.EmailAlreadyExistException;
-import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.InvalidPasswordException;
-import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNameAlreadyExistsException;
-import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNotFoundException;
+import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.*;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
 import jakarta.transaction.Transactional;
@@ -59,9 +56,12 @@ public class UserService {
     public String login(LoginDTO loginDTO)
     {
         User user = userRepo.findByEmail(loginDTO.getEmail());
+        if (user == null) {
+            throw new EmailNotFoundException("Email not found");
+        }
         if(user == null || !passwordEncoder.matches(loginDTO.getPassword(), user.getPassword()))
         {
-            throw new InvalidPasswordException("Wrong credentials");
+            throw new InvalidPasswordException("Wrong Password");
         }
         return authUtil.generateAccessToken(user);
     }

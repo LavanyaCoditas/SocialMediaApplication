@@ -45,6 +45,7 @@ public class Posts {
     List<Comments> commentsList;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private PostStatus status = PostStatus.PENDING;
 
     @ElementCollection
