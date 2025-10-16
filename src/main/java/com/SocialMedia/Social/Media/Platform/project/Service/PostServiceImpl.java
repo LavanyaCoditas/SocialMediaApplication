@@ -11,11 +11,10 @@ import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.Unauthori
 import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.UserNotFoundException;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
+import com.SocialMedia.Social.Media.Platform.project.ServiceInterfaces.PostService;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AppUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class PostService  implements com.SocialMedia.Social.Media.Platform.project.ServiceInterfaces.PostService {
+public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepo postRepo;
@@ -68,55 +67,44 @@ public class PostService  implements com.SocialMedia.Social.Media.Platform.proje
 
     public List<PostResponse> getApprovedPosts() {
         List<Posts>listofPosts=postRepo.findByStatus(PostStatus.APPROVED);
-        List<PostResponse> response = new ArrayList<>();
-        for(int i = 0; i < listofPosts.size(); i++){
-            Long id = listofPosts.get(i).getId();
-            String title = listofPosts.get(i).getTitle();
-            String content = listofPosts.get(i).getContent();
-            PostStatus status = listofPosts.get(i).getStatus();
-            LocalDateTime created_at= listofPosts.get(i).getDateTime();
-            Long userId= listofPosts.get(i).getUser().getId();
-            String username = listofPosts.get(i).getUser().getUsername();
-            response.add(new PostResponse(id, title, content, status,created_at,userId,username));
-        }
-
-        return response;
+        return listofPosts.stream().map(posts -> new PostResponse(
+                posts.getId(),
+                posts.getTitle(),
+                posts.getContent(),
+                posts.getStatus(),
+                posts.getDateTime(),
+                posts.getUser().getId(),
+                posts.getUser().getUsername()
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<PostResponse> getUserPosts(String username) {
         User user = userRepo.findByUsername(username);
         List <Posts> list = postRepo.findByUser(user);
-        List <PostResponse> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++)
-        {
-            Long postid= list.get(i).getId();
-            String title = list.get(i).getTitle();
-            String content = list.get(i).getContent();
-            PostStatus status= list.get(i).getStatus();
-            LocalDateTime dateTime = list.get(i).getDateTime();
-            Long userId = list.get(i).getId();
-            String user_name=list.get(i).getUser().getUsername();
-            response.add(new PostResponse(postid,title,content,status,dateTime,userId,user_name));
-        }
-        return  response;
+        return  list.stream().map(posts -> new PostResponse(posts.getId(),
+                posts.getTitle(),
+                posts.getContent(),
+                posts.getStatus(),
+                posts.getDateTime(),
+                posts.getUser().getId(),
+               posts.getUser().getUsername()))
+                .collect(Collectors.toList());
     }
+
     public List<PostResponse> getUsersDeniedPosts(String username)
     {
         User user = userRepo.findByUsername(username);
         List<Posts>listofPosts = postRepo.findByUserUsernameAndStatusOrderById(username,PostStatus.BLACKLISTED);
-        List<PostResponse> response= new ArrayList<>();
-
-        for(int i = 0; i < listofPosts.size(); i++) {
-            Long id = listofPosts.get(i).getId();
-            String title = listofPosts.get(i).getTitle();
-            String content = listofPosts.get(i).getContent();
-            PostStatus status = listofPosts.get(i).getStatus();
-            LocalDateTime created_at = listofPosts.get(i).getDateTime();
-            Long userId = listofPosts.get(i).getUser().getId();
-
-            response.add(new PostResponse(id, title, content, status, created_at, userId, username));
-        }
-        return response;
+        return listofPosts.stream().map(posts -> new PostResponse(
+                posts.getId(),
+                posts.getTitle(),
+                posts.getContent(),
+                posts.getStatus(),
+                posts.getDateTime(),
+                posts.getUser().getId(),
+                posts.getUser().getUsername()))
+                .collect(Collectors.toList());
         }
 
     public void deletePost(Long postId, String currentUsername) {
@@ -230,25 +218,32 @@ public class PostService  implements com.SocialMedia.Social.Media.Platform.proje
             }
             List<Posts>list= postRepo.findByDisapprovedByContaining(user.getUsername());
             List<PostResponse> response = new ArrayList<>();
-            for (Posts post : list) {
-                response.add(new PostResponse(post.getId(), post.getTitle(),
-                        post.getContent(),post.getStatus(),post.getDateTime(),
-                        post.getUser().getId(),post.getUser().getUsername()));
-            }
-            return response;
+
+           return list.stream().map(posts -> new PostResponse(
+                    posts.getId(),
+                    posts.getTitle(),
+                    posts.getContent(),
+                    posts.getStatus(),
+                    posts.getDateTime(),
+                    posts.getUser().getId(),
+                    posts.getUser().getUsername())).collect(Collectors.toList());
         }
 
         public List<PostResponse> getPendingPosts() {
             List<Posts> list = postRepo.findByStatus(PostStatus.PENDING);
             List<PostResponse> response = new ArrayList<>();
-            for (Posts post : list) {
-                response.add(new PostResponse(post.getId(), post.getTitle(),
-                        post.getContent(),post.getStatus(),post.getDateTime(),
-                        post.getUser().getId(),post.getUser().getUsername()));
-            }
-            return response;
+
+            return list.stream().map(posts -> new PostResponse(
+                    posts.getId(),
+                    posts.getTitle(),
+                    posts.getContent(),
+                    posts.getStatus(),
+                    posts.getDateTime(),
+                    posts.getUser().getId(),
+                    posts.getUser().getUsername()))
+                    .collect(Collectors.toList());
         }
-//use stream wherveer possible
+//use stream wherever possible
     public List<PostResponse> getPosts(String username) {
         User user = userRepo.findByUsername(username);
         List<Posts> list = postRepo.findByUser(user);

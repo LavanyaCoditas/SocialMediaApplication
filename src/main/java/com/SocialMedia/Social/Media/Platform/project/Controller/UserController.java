@@ -2,12 +2,11 @@ package com.SocialMedia.Social.Media.Platform.project.Controller;
 
 import com.SocialMedia.Social.Media.Platform.project.DTO.UserListDto;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
-import com.SocialMedia.Social.Media.Platform.project.Service.UserService;
+import com.SocialMedia.Social.Media.Platform.project.Service.UserServiceImpl;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,14 +18,14 @@ import java.util.Map;
 public class UserController
 {
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
     AppUtils appUtils;
 
     @GetMapping("current/user/{id}")
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
         String currentUsername = appUtils.fetchUsername();
-        User user = userService.getUserById(id, currentUsername);
+        User user = userServiceImpl.getUserById(id, currentUsername);
         return ResponseEntity.ok(user);
     }
 
@@ -35,7 +34,7 @@ public class UserController
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         String currentUsername = appUtils.fetchUsername();
         try {
-            userService.deleteUser(id, currentUsername);
+            userServiceImpl.deleteUser(id, currentUsername);
             return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
         } catch (RuntimeException e) {
             if (e.getMessage().equals("User not found")) {
@@ -49,7 +48,7 @@ public class UserController
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<?> getAllUsers() {
         String currentUsername = appUtils.fetchUsername();
-        List<UserListDto> users = userService.getAllUsers(currentUsername);
+        List<UserListDto> users = userServiceImpl.getAllUsers(currentUsername);
         return ResponseEntity.ok(users);
     }
 
@@ -57,7 +56,7 @@ public class UserController
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<List<UserListDto>> getAllModerators() {
 //
-            List<UserListDto> moderators = userService.getAllModerators();
+            List<UserListDto> moderators = userServiceImpl.getAllModerators();
             return ResponseEntity.ok(moderators);
 //
     }

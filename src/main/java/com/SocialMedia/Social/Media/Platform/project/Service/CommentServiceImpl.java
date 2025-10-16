@@ -9,15 +9,17 @@ import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.CommentNo
 import com.SocialMedia.Social.Media.Platform.project.Repository.CommentRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
+import com.SocialMedia.Social.Media.Platform.project.ServiceInterfaces.CommentService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class CommentService {
+public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private CommentRepo commentRepo;
@@ -91,7 +93,6 @@ public class CommentService {
         if (commentUser != null && commentUser.getUsername().equals(moderator.getUsername())) {
             throw new RuntimeException("Moderators cannot approve their own comments!");
         }
-
         // Initialize lists if null
         if (comment.getApprovedBy() == null) {
             comment.setApprovedBy(new ArrayList<>());
@@ -134,51 +135,42 @@ public class CommentService {
     {
         Posts post = postRepo.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
         List<Comments> commentsList=commentRepo.findByPostAndStatus(post,CommentStatus.APPROVED);
-        List<CommentResponse> response = new ArrayList<>();
-        for (int i = 0; i < commentsList.size(); i++)
-        {
-            Long id =commentsList.get(i).getId();
-          String content = commentsList.get(i).getContent().toString();
-            String status = commentsList.get(i).getStatus().toString();
-          String username= commentsList.get(i).getUser().getUsername();
-          response.add(new CommentResponse(id,content,status,postId,username));
-        }
-        return response;
+
+        return commentsList.stream()
+                .map(comments -> new CommentResponse(
+                        comments.getId(),
+                        comments.getContent(),
+                        comments.getStatus().toString(),
+                        comments.getPost().getId(),
+                        comments.getUser() != null ? comments.getUser().getUsername() : "anonymous"
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<CommentResponse> getUserComments(String username) {
         User user = userRepo.findByUsername(username);
         Long id = user.getId();
         List<Comments> list = userRepo.findById(id).get().getCommentsList();
-        List<CommentResponse> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            String content = list.get(i).getContent();
-            Long commentId= list.get(i).getId();
-            String status=list.get(i).getStatus().toString();
-            Long postId =list.get(i).getPost().getId();
-            response.add(new CommentResponse(commentId,content,status,postId,username));
-        }
-        //private Long id;
-        //    private String content;
-        //    private String status;
-        //    private Long postId;
-        //    private String username;
-        return response;
+
+        return list.stream().map(comments -> new CommentResponse(
+                        comments.getId(),
+                comments.getContent(),
+                comments.getStatus().toString(),
+                comments.getPost().getId(),
+                comments.getUser().getUsername()
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<CommentResponse> getPendingComments() {
         List<Comments> list= commentRepo.findByStatusOrderById(CommentStatus.PENDING);
-
-        List<CommentResponse> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            String content = list.get(i).getContent();
-            Long commentId= list.get(i).getId();
-            String status=list.get(i).getStatus().toString();
-            String username=list.get(i).getUser().getUsername();
-            Long postId=list.get(i).getPost().getId();
-            response.add(new CommentResponse(commentId,content,status,postId,username));
-        }
-        return response;
+        return list.stream().map(comments -> new CommentResponse(
+                comments.getId(),
+                comments.getContent(),
+                comments.getStatus().toString(),
+                comments.getPost().getId(),
+                comments.getUser().getUsername()
+        )).collect(Collectors.toList());
     }
 
 
@@ -189,33 +181,26 @@ public class CommentService {
             throw new RuntimeException("Unauthorized: Only moderators or super admins can view blocked comments");
         }
         List<Comments> list=commentRepo.findByDisapprovedByContaining(moderator.getId().toString());
-        List<CommentResponse> response=new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            String content = list.get(i).getContent();
-            Long commentId= list.get(i).getId();
-            String status=list.get(i).getStatus().toString();
-            String username= list.get(i).getUser().getUsername();
-            Long postId =list.get(i).getPost().getId();
-            response.add(new CommentResponse(commentId,content,status,postId,username));
-        }
-        return response;
 
+        return list.stream().map(comments -> new CommentResponse(
+                comments.getId(),
+                comments.getContent(),
+                comments.getStatus().toString(),
+                comments.getPost().getId(),
+                comments.getUser().getUsername()
+        )).collect(Collectors.toList());
     }
 
     public List<CommentResponse> getAllComments()
     {
         List<Comments> list= commentRepo.findAll();
-
-        List<CommentResponse> response = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            String content = list.get(i).getContent();
-           String username= list.get(i).getUser().getUsername();
-            Long commentId= list.get(i).getId();
-            String status=list.get(i).getStatus().toString();
-            Long postId =list.get(i).getPost().getId();
-            response.add(new CommentResponse(commentId,content,status,postId,username));
-        }
-        return response;
+        return list.stream().map(comments -> new CommentResponse(
+                comments.getId(),
+                comments.getContent(),
+                comments.getStatus().toString(),
+                comments.getPost().getId(),
+                comments.getUser().getUsername()
+        )).collect(Collectors.toList());
 
     }
 }

@@ -3,13 +3,12 @@ import com.SocialMedia.Social.Media.Platform.project.DTO.PostDto;
 import com.SocialMedia.Social.Media.Platform.project.DTO.PostResponse;
 import com.SocialMedia.Social.Media.Platform.project.Entity.Posts;
 import com.SocialMedia.Social.Media.Platform.project.Repository.PostRepo;
-import com.SocialMedia.Social.Media.Platform.project.Service.PostService;
+import com.SocialMedia.Social.Media.Platform.project.Service.PostServiceImpl;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AppUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
 public class PostController
 {
     @Autowired
-    private PostService postService;
+    private PostServiceImpl postServiceImpl;
     @Autowired
     private PostRepo postRepo;
     @Autowired
@@ -29,14 +28,14 @@ public class PostController
     @PostMapping("/create")
     public ResponseEntity<?> createPost(@Valid @RequestBody PostDto postDto) {
         String username = appUtils.fetchUsername();
-        Posts post = postService.createPost(postDto, username);
+        Posts post = postServiceImpl.createPost(postDto, username);
         return ResponseEntity.ok(new PostResponse(post.getId(),post.getTitle(),post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
     }
 
     @PutMapping("update/{id}")
     public ResponseEntity<?> editPost(@PathVariable Long id, @Valid @RequestBody PostDto postDto) {
         String username = appUtils.fetchUsername();
-        Posts post = postService.editPost(id, postDto, username);
+        Posts post = postServiceImpl.editPost(id, postDto, username);
         return ResponseEntity.ok(new PostResponse(post.getId(),post.getTitle(),post.getContent(),post.getStatus(),post.getDateTime(),post.getUser().getId(),post.getUser().getUsername()));
     }
     
@@ -44,20 +43,20 @@ public class PostController
     @GetMapping("/live")
     public List<PostResponse> getApprovedPosts()
     {
-        return postService.getApprovedPosts();
+        return postServiceImpl.getApprovedPosts();
     }
 
     @GetMapping("/profile")
     public ResponseEntity<List<PostResponse>>getUserPosts() {
         String username = appUtils.fetchUsername();
-        return ResponseEntity.ok(postService.getUserPosts(username));
+        return ResponseEntity.ok(postServiceImpl.getUserPosts(username));
     }
 
     @GetMapping("/disapproved")
     public ResponseEntity<List<PostResponse>> getDisapprovedPosts()
     {
         String currentUsername = appUtils.fetchUsername();
-        return ResponseEntity.ok(postService.getBlockedPostsByModerator(currentUsername));
+        return ResponseEntity.ok(postServiceImpl.getBlockedPostsByModerator(currentUsername));
     }
 
     //users own posts which have been denied approval
@@ -65,12 +64,12 @@ public class PostController
     public List<PostResponse> getDeniedPosts()
     {
         String username= appUtils.fetchUsername();
-        return postService.getUsersDeniedPosts(username);
+        return postServiceImpl.getUsersDeniedPosts(username);
     }
 
     @DeleteMapping("/{post_id}")
     public void deletePost (@PathVariable Long post_id) {
     String currentUserName = appUtils.fetchUsername();
-    postService.deletePost(post_id, currentUserName);
+    postServiceImpl.deletePost(post_id, currentUserName);
      }
      }

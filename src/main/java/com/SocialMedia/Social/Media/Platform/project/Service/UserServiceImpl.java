@@ -7,20 +7,20 @@ import com.SocialMedia.Social.Media.Platform.project.Constants.Role;
 import com.SocialMedia.Social.Media.Platform.project.Entity.User;
 import com.SocialMedia.Social.Media.Platform.project.ExceptionHandling.*;
 import com.SocialMedia.Social.Media.Platform.project.Repository.UserRepo;
+import com.SocialMedia.Social.Media.Platform.project.ServiceInterfaces.UserService;
 import com.SocialMedia.Social.Media.Platform.project.Utils.AuthUtil;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepo userRepo;
 
@@ -118,32 +118,24 @@ public class UserService {
 
     public List<UserListDto> getAllUsers(String currentUsername) {
  List<User> list =  userRepo.findAll();
- List<UserListDto> UsersList=new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-
-            Long id = list.get(i).getId();
-            String username =list.get(i).getUsername();
-            String email =list.get(i).getEmail();
-            LocalDateTime createdAt =list.get(i).getCreatedAt();
-            Role roles = list.get(i).getRole();
-            UsersList.add(new UserListDto(id,username,email,createdAt,roles));
-        }
-        return UsersList;
+        return list.stream().map(user -> new UserListDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getRole()
+        )).collect(Collectors.toList());
     }
 
     public List<UserListDto> getAllModerators() {
         List<User> list= userRepo.findByRole(Role.ROLE_MODERATOR);
-        List<UserListDto> moderators = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-
-            Long id = list.get(i).getId();
-            String username =list.get(i).getUsername();
-            String email =list.get(i).getEmail();
-            LocalDateTime createdAt =list.get(i).getCreatedAt();
-            Role roles = list.get(i).getRole();
-            moderators.add(new UserListDto(id,username,email,createdAt,roles));
-        }
-        return moderators;
+        return list.stream().map(user ->  new UserListDto(
+                        user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getRole()))
+                .collect(Collectors.toList());
     }
 }
 
